@@ -1,4 +1,5 @@
-import axios from "axios";
+import { registerUser } from "../api/user";
+
 import { useState } from "react";
 
 export default function Register() {
@@ -16,28 +17,21 @@ export default function Register() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/users/register",
-        {
-          email,
-          password,
-          nickname,
-        }
-      );
-
-      alert(response.data); // "회원가입 완료" 메시지 출력
-      // 성공 시 입력 초기화
-      setEmail("");
-      setNickname("");
-      setPassword("");
-      setConfirmPassword("");
+      const res = await registerUser({
+        email,
+        password,
+        nickname,
+      });
+      console.log("✅ 서버 응답:", res);
+      alert("회원가입 성공!");
     } catch (error) {
-      if (error.response) {
-        alert(`에러: ${error.response.data}`);
-      } else {
-        alert("회원가입 실패");
-      }
+      alert("회원가입 실패!");
+      console.error(error);
     }
+    setEmail("");
+    setNickname("");
+    setPassword("");
+    setConfirmPassword("");
   };
 
   return (
