@@ -7,3 +7,7 @@ export const registerUser = (userData) => {
 export const loginUser = (loginData) => {
   return axios.post("/users/login", loginData);
 };
+
+export const checkNickname = (nickname) => {
+  return axios.get(`/users/check-nickname?nickname=${nickname}`);
+};

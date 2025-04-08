@@ -2,7 +2,11 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        gowun: ["'Gowun Dodum'", "sans-serif"], // ✅ 별명처럼 등록!
+      },
+    },
   },
   plugins: [],
 };
