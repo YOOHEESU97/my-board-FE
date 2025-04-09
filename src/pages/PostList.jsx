@@ -1,25 +1,27 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-const dummyPosts = [
-  {
-    id: 1,
-    title: "첫 번째 게시글입니다!",
-    author: "홍길동",
-    createdAt: "2025-04-07",
-  },
-  {
-    id: 2,
-    title: "두 번째 글도 있어요.",
-    author: "이몽룡",
-    createdAt: "2025-04-06",
-  },
-];
+import { getPosts } from "../api/post";
 
 export default function PostList() {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const data = await getPosts();
+        console.log(data.data);
+        setPosts(data.data);
+      } catch (error) {
+        console.error("게시글 불러오기 실패", error);
+      }
+    };
+    loadPosts();
+  }, []);
   return (
-    <>
+    <div className="max-w-md w-full bg-gray-50 rounded-xl shadow-lg p-6">
+      {/* 헤더 */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">📋 게시판</h1>
+        <h1 className="text-2xl font-bold">📋 게시글 목록</h1>
         <Link
           to="/posts/write"
           className="text-green-600 text-sm font-semibold hover:underline"
@@ -28,22 +30,29 @@ export default function PostList() {
         </Link>
       </div>
 
+      {/* 게시글 목록 */}
       <div className="flex flex-col gap-4">
-        {dummyPosts.map((post) => (
-          <Link
-            to={`/posts/${post.id}`}
-            key={post.id}
-            className="border border-gray-300 rounded-lg p-4 hover:bg-gray-100 transition"
-          >
-            <h2 className="text-lg font-semibold text-gray-800">
-              {post.title}
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              {post.author} ・ {post.createdAt}
-            </p>
-          </Link>
-        ))}
+        {posts.length === 0 ? (
+          <p className="text-gray-500 text-sm text-center">
+            아직 게시글이 없습니다.
+          </p>
+        ) : (
+          posts.map((post) => (
+            <Link
+              to={`/posts/${post.id}`}
+              key={post.id}
+              className="border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition"
+            >
+              <h2 className="text-lg font-semibold text-gray-800">
+                {post.title}
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                {post.nickname} ・ {new Date(post.createAt).toLocaleString()}
+              </p>
+            </Link>
+          ))
+        )}
       </div>
-    </>
+    </div>
   );
 }

@@ -22,10 +22,13 @@ export default function Login() {
 
   return (
     <div className="max-w-md mx-auto mt-10 px-4">
-      {/* 헤더 */}
-      <h1 className="text-2xl font-bold mb-6">🔐 로그인</h1>
-
-      {/* 폼 */}
+      {/* 임시 */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold mb-6">🔐 로그인</h1>
+        <Link to="/posts" className="text-blue-500 hover:underline">
+          임시이동
+        </Link>
+      </div>
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
         <div className="flex flex-col">
           <label className="mb-1 text-sm text-gray-600">이메일</label>
