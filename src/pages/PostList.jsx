@@ -8,17 +8,18 @@ export default function PostList() {
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        const data = await getPosts();
-        console.log(data.data);
-        setPosts(data.data);
+        const res = await getPosts();
+        console.log(res.data);
+        setPosts(res.data);
       } catch (error) {
         console.error("게시글 불러오기 실패", error);
       }
     };
     loadPosts();
   }, []);
+
   return (
-    <div className="max-w-md w-full bg-gray-50 rounded-xl shadow-lg p-6">
+    <div className="w-full max-w-md mx-auto p-6 bg-gray-50 rounded-xl shadow">
       {/* 헤더 */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">📋 게시글 목록</h1>
@@ -47,7 +48,8 @@ export default function PostList() {
                 {post.title}
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                {post.nickname} ・ {new Date(post.createAt).toLocaleString()}
+                {post.nickname} ・{" "}
+                {new Date(post.createAt).toLocaleString("ko-KR")}
               </p>
             </Link>
           ))

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -8,12 +8,10 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
-      // TODO: 실제 API 연동
       console.log("로그인 요청:", email, password);
       alert("로그인 성공! (API 연동 예정)");
-      navigate("/posts"); // 로그인 성공 시 이동
+      navigate("/posts");
     } catch (error) {
       alert("로그인 실패!");
       console.error(error);
@@ -21,15 +19,17 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 px-4">
-      {/* 임시 */}
+    <div className="w-full max-w-md mx-auto p-6 bg-gray-50 rounded-xl shadow">
+      {/* 상단 제목 + 임시 버튼 */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold mb-6">🔐 로그인</h1>
-        <Link to="/posts" className="text-blue-500 hover:underline">
+        <h1 className="text-2xl font-bold">🔐 로그인</h1>
+        <Link to="/posts" className="text-sm text-blue-500 hover:underline">
           임시이동
         </Link>
       </div>
+
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        {/* 이메일 */}
         <div className="flex flex-col">
           <label className="mb-1 text-sm text-gray-600">이메일</label>
           <input
@@ -41,6 +41,7 @@ export default function Login() {
           />
         </div>
 
+        {/* 비밀번호 */}
         <div className="flex flex-col">
           <label className="mb-1 text-sm text-gray-600">비밀번호</label>
           <input
