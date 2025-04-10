@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getPostById, updatedPost } from "../api/post";
 import { useNavigate, useParams } from "react-router-dom";
+import Modal from "../components/Modal";
 
 const PostEdit = () => {
   const { id } = useParams();
@@ -8,32 +9,32 @@ const PostEdit = () => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [updateFlag, setUpdateFlag] = useState(false);
+  const [showUpdateModal, setUpdateModal] = useState(false);
+
+  const getPost = useCallback(async () => {
+    try {
+      const res = await getPostById(id);
+      setTitle(res.data.title);
+      setContent(res.data.content);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [id]);
 
   useEffect(() => {
-    const getPost = async () => {
-      try {
-        const res = await getPostById(id);
-        setTitle(res.data.title);
-        setContent(res.data.content);
-      } catch (err) {
-        console.error(err);
-        //모달로 alert("게시글 정보를 불러올 수 없습니다.");
-      }
-    };
     getPost();
-  }, [id]);
+  }, [getPost]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log(id, title, content);
       await updatedPost(id, { title, content });
-      console.log("✅ 수정 완료!"); // ← 이게 찍히는지 확인
-      // 모달
-      //nav(`/posts/${id}`);
+      setUpdateFlag(true);
+      setUpdateModal(true);
     } catch (err) {
+      setUpdateModal(true);
       console.error(err);
-      // 모달
     }
   };
 
@@ -62,6 +63,18 @@ const PostEdit = () => {
           수정 완료
         </button>
       </form>
+      {showUpdateModal && (
+        <Modal
+          title={updateFlag ? "✅ 성공" : "⚠️ 실패"}
+          message={
+            updateFlag
+              ? "수정이 완료되었습니다."
+              : "수정에 실패했습니다. 잠시후 다시 시도바랍니다."
+          }
+          confirmLabel="확인"
+          onClose={() => nav(`/posts/${id}`)}
+        />
+      )}
     </div>
   );
 };

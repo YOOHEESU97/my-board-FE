@@ -20,12 +20,8 @@ export default function Login() {
 
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-gray-50 rounded-xl shadow">
-      {/* 상단 제목 + 임시 버튼 */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">🔐 로그인</h1>
-        <Link to="/posts" className="text-sm text-blue-500 hover:underline">
-          임시이동
-        </Link>
       </div>
 
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
