@@ -6,13 +6,14 @@ import Register from "./pages/Register.jsx";
 import PostList from "./pages/PostList.jsx";
 import PostWrite from "./pages/PostWriter.jsx";
 import PostDetail from "./pages/PostDetail.jsx";
-import MyPage from "./pages/MyPage.jsx"; // 나중에 마이페이지 등도 분리 가능
+import MyPage from "./pages/MyPage.jsx";
 import PostEdit from "./pages/PostEdit.jsx";
+import Home from "./pages/Home.jsx";
 
 export default function Router() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/posts" />} />
+      <Route path="/" element={<Navigate to="/home" />} />
       <Route
         path="/login"
         element={
@@ -66,6 +67,14 @@ export default function Router() {
         element={
           <Layout>
             <MyPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/home"
+        element={
+          <Layout>
+            <Home />
           </Layout>
         }
       />

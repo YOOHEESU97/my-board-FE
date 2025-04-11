@@ -1,17 +1,30 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../api/user";
+import { useUser } from "../context/AppContext";
+import jwtDecode from "jwt-decode";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const nav = useNavigate();
+  const { setUser } = useUser();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      console.log("로그인 요청:", email, password);
-      alert("로그인 성공! (API 연동 예정)");
-      navigate("/posts");
+      const res = await loginUser({
+        email,
+        password,
+      });
+      localStorage.setItem("token", res.data);
+      const decoded = jwtDecode(res.data);
+      setUser({
+        email: decoded.sub,
+        nickname: decoded.nickname,
+        role: decoded.role,
+      });
+      nav("/home");
     } catch (error) {
       alert("로그인 실패!");
       console.error(error);

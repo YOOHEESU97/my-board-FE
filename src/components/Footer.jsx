@@ -4,7 +4,7 @@ const Footer = () => {
   const { pathname } = useLocation();
 
   const navItems = [
-    { to: "/login", label: "홈", emoji: "🏠" },
+    { to: "/home", label: "홈", emoji: "🏠" },
     { to: "/posts", label: "게시판", emoji: "📋" },
     { to: "/mypage", label: "마이페이지", emoji: "🧍" },
   ];

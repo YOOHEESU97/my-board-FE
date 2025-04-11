@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPost } from "../api/post";
+import { useUser } from "../context/AppContext";
 import Modal from "../components/Modal";
 
 export default function PostWrite() {
@@ -8,19 +9,20 @@ export default function PostWrite() {
   const [content, setContent] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(null); // "success" | "error" | null
+  const { user } = useUser();
   const nav = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault(); // 새로고침 방지
 
     if (!validateForm()) return;
-    const nickname = "HS";
-    const email = "qwer@naver.com";
+
     try {
+      // 저장
       await createPost({
         title,
         content,
-        nickname,
-        email,
+        nickname: user.nickname,
+        email: user.email,
       });
       setModalType("success");
       setShowModal(true);
