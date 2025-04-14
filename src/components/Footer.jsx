@@ -6,6 +6,7 @@ const Footer = () => {
   const navItems = [
     { to: "/home", label: "홈", emoji: "🏠" },
     { to: "/posts", label: "게시판", emoji: "📋" },
+    { to: "/trackDelivery", label: "배송조회", emoji: "📦" },
     { to: "/mypage", label: "마이페이지", emoji: "🧍" },
   ];
 
