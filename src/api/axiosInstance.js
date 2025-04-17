@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -19,39 +19,39 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// ✅ 응답 인터셉터: 401일 경우 refreshToken 사용해 재요청
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // 403 or 401, 최초 재시도 여부 체크
     if (
-      error.response &&
-      error.response.status === 403 &&
-      !originalRequest._retry
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      localStorage.getItem("refreshToken")
     ) {
       originalRequest._retry = true;
 
       try {
-        const res = await axios.post(
-          "http://localhost:8080/api/users/refresh",
-          {},
-          { withCredentials: true }
-        );
-        const newAccessToken = res.data.accessToken;
+        const res = await axios.post("http://localhost:8080/api/reissue", {
+          accessToken: localStorage.getItem("accessToken"),
+          refreshToken: localStorage.getItem("refreshToken"),
+        });
 
-        localStorage.setItem("token", newAccessToken);
+        const newAccessToken = res.data.accessToken;
+        localStorage.setItem("accessToken", newAccessToken);
 
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
-        return axiosInstance(originalRequest);
+        return axiosInstance(originalRequest); // ✅ 재요청
       } catch (refreshError) {
         console.error("토큰 재발급 실패", refreshError);
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-        return Promise.reject(refreshError);
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login"; // 로그인 페이지로 리다이렉트
       }
     }
+
     return Promise.reject(error);
   }
 );

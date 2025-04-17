@@ -4,9 +4,9 @@ import jwtDecode from "jwt-decode";
 // Appcontent 유저 정보를 담는 전역 저장소 생성
 const AppContext = createContext();
 
-const AppProvider = ({ children }) => {
+export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
     if (token) {
       try {
         const decoded = jwtDecode(token);
@@ -15,8 +15,8 @@ const AppProvider = ({ children }) => {
           nickname: decoded.nickname,
           role: decoded.role,
         };
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error("유저 정보", err);
         return null;
       }
     }
@@ -32,6 +32,4 @@ const AppProvider = ({ children }) => {
   );
 };
 
-const useUser = () => useContext(AppContext);
-
-export { AppProvider, useUser };
+export const useUser = () => useContext(AppContext);

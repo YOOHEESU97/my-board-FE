@@ -18,7 +18,7 @@ const Footer = () => {
             to={item.to}
             key={item.to}
             className={`text-center text-sm flex flex-col items-center justify-center transition ${
-              pathname === item.to
+              pathname.startsWith(item.to)
                 ? "text-blue-600 font-semibold"
                 : "text-gray-500"
             }`}

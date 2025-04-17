@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getTrackingDelivery } from "../api/post";
 import CarrierCombobox from "../components/CarrierCombobox"; // 경로에 맞게
+import Modal from "../components/Modal";
 
 export default function TrackDelivery() {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [selectedCarrier, setSelectedCarrier] = useState("");
+  const [showModal, setShowModal] = useState(false);
   const nav = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,9 +20,14 @@ export default function TrackDelivery() {
         carrier: selectedCarrier,
         invoice: invoiceNumber,
       });
+
       console.log("조회 성공", res);
+      nav("/trackDelivery/result", {
+        state: res.data,
+      });
     } catch (err) {
       console.log("조회 실패", err);
+      setShowModal(true);
     }
   };
   return (
@@ -55,6 +62,16 @@ export default function TrackDelivery() {
           조회하기
         </button>
       </form>
+      {showModal && (
+        <Modal
+          title={"❌ 조회 실패"}
+          message={`배송 조회 중 오류가 발생했습니다. \n다시 시도해주세요.`}
+          confirmLabel="확인"
+          onClose={() => {
+            setShowModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }

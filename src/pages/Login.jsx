@@ -17,8 +17,9 @@ export default function Login() {
         email,
         password,
       });
-      localStorage.setItem("token", res.data);
-      const decoded = jwtDecode(res.data);
+      localStorage.setItem("accessToken", res.data.accessToken);
+      localStorage.setItem("refreshToken", res.data.refreshToken);
+      const decoded = jwtDecode(res.data.accessToken);
       setUser({
         email: decoded.sub,
         nickname: decoded.nickname,

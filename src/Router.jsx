@@ -10,6 +10,7 @@ import MyPage from "./pages/MyPage.jsx";
 import PostEdit from "./pages/PostEdit.jsx";
 import Home from "./pages/Home.jsx";
 import TrackDelivery from "./pages/TrackDelivery.jsx";
+import TrackResult from "./pages/TrackResult.jsx";
 
 export default function Router() {
   return (
@@ -84,6 +85,14 @@ export default function Router() {
         element={
           <Layout>
             <TrackDelivery />
+          </Layout>
+        }
+      />
+      <Route
+        path="/trackDelivery/result"
+        element={
+          <Layout>
+            <TrackResult />
           </Layout>
         }
       />

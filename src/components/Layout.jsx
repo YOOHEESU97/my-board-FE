@@ -4,13 +4,13 @@ import FloatingButton from "./FloatingButton";
 
 export default function Layout({ children }) {
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-white">
+    <div className="min-h-screen flex flex-col bg-white">
       {/*<Header />*/}
-      <div className="flex-grow flex justify-center items-center">
-        <div className="w-full max-w-md bg-gray-50 rounded-xl shadow-xl p-6">
-          {children}
-        </div>
-      </div>
+
+      <main className="flex-grow w-full flex justify-center px-4 py-10 overflow-y-auto">
+        <div className="w-full max-w-3xl">{children}</div>
+      </main>
+
       <Footer />
       <FloatingButton />
     </div>
