@@ -1,4 +1,5 @@
 import axios from "axios";
+import { showSessionExpiredToast } from "../components/ToastManager.jsx";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8080/api",
@@ -24,23 +25,26 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-
+    console.log("🔍 originalRequest._retry 상태:", originalRequest);
     if (
-      error.response?.status === 401 &&
+      (error.response?.status === 401 || error.response?.status === 403) &&
       !originalRequest._retry &&
       localStorage.getItem("refreshToken")
     ) {
       originalRequest._retry = true;
 
       try {
-        const res = await axios.post("http://localhost:8080/api/reissue", {
-          accessToken: localStorage.getItem("accessToken"),
-          refreshToken: localStorage.getItem("refreshToken"),
-        });
+        const res = await axios.post(
+          "http://localhost:8080/api/users/reissue",
+          {
+            accessToken: localStorage.getItem("accessToken"),
+            refreshToken: localStorage.getItem("refreshToken"),
+          }
+        );
 
         const newAccessToken = res.data.accessToken;
         localStorage.setItem("accessToken", newAccessToken);
-
+        showSessionExpiredToast();
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
         return axiosInstance(originalRequest); // ✅ 재요청
@@ -48,7 +52,6 @@ axiosInstance.interceptors.response.use(
         console.error("토큰 재발급 실패", refreshError);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        window.location.href = "/login"; // 로그인 페이지로 리다이렉트
       }
     }
 
