@@ -11,6 +11,7 @@ import PostEdit from "./pages/PostEdit.jsx";
 import Home from "./pages/Home.jsx";
 import TrackDelivery from "./pages/TrackDelivery.jsx";
 import TrackResult from "./pages/TrackResult.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 export default function Router() {
   return (
@@ -75,9 +76,11 @@ export default function Router() {
       <Route
         path="/home"
         element={
-          <Layout>
-            <Home />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Home />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route

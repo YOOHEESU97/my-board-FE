@@ -1,5 +1,6 @@
 import axios from "axios";
 import { showSessionExpiredToast } from "../components/ToastManager.jsx";
+import { updateUserFromToken } from "../utils/userUpdater";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8080/api",
@@ -44,12 +45,13 @@ axiosInstance.interceptors.response.use(
 
         const newAccessToken = res.data.accessToken;
         localStorage.setItem("accessToken", newAccessToken);
-        showSessionExpiredToast();
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+        updateUserFromToken(newAccessToken);
 
         return axiosInstance(originalRequest); // ✅ 재요청
       } catch (refreshError) {
         console.error("토큰 재발급 실패", refreshError);
+        showSessionExpiredToast();
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
       }

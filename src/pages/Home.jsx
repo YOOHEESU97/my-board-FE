@@ -12,7 +12,7 @@ export default function Home() {
   const nav = useNavigate();
   const { user } = useUser();
   const [weather, setWeather] = useState(null);
-
+  console.log(user);
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const { latitude, longitude } = pos.coords;

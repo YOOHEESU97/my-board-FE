@@ -10,6 +10,7 @@ export const AppProvider = ({ children }) => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
+        console.log(decoded);
         return {
           email: decoded.sub,
           nickname: decoded.nickname,
