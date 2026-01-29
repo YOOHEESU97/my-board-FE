@@ -5,16 +5,12 @@ import { getPosts } from "../api/post";
 
 /**
  * PostList: 게시글 목록 페이지
- * - 전체 게시글 목록 조회 및 표시
- * - 각 게시글 클릭 시 상세 페이지로 이동
- * - 우상단에 글쓰기 링크 제공
  */
 export default function PostList() {
   const [posts, setPosts] = useState([]);
 
   /**
    * 게시글 목록 로드
-   * - 컴포넌트 마운트 시 전체 게시글 조회
    */
   useEffect(() => {
     const loadPosts = async () => {

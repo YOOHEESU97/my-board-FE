@@ -6,10 +6,6 @@ import Modal from "../components/Modal";
 
 /**
  * PostEdit: 게시글 수정 페이지
- * - URL 파라미터로 게시글 ID 받기
- * - 기존 게시글 내용 불러와서 폼에 표시
- * - 수정 후 저장 시 백엔드에 PUT 요청
- * - 수정 완료 시 모달 표시 후 상세 페이지로 이동
  */
 const PostEdit = () => {
   const { id } = useParams(); // URL 파라미터에서 게시글 ID 추출

@@ -6,10 +6,6 @@ import Modal from "../components/Modal";
 
 /**
  * Register: 회원가입 페이지 컴포넌트
- * - 이메일, 닉네임, 비밀번호 입력 및 유효성 검사
- * - 닉네임 중복 확인 기능
- * - 비밀번호 확인 (일치 여부 검증)
- * - 회원가입 완료 시 모달 표시 후 로그인 페이지로 이동
  */
 export default function Register() {
   // 폼 입력 상태
@@ -35,8 +31,6 @@ export default function Register() {
 
   /**
    * handleCheckNickname: 닉네임 중복 확인 처리
-   * - 백엔드에 중복 확인 요청
-   * - 사용 가능/불가능 메시지 표시
    */
   const handleCheckNickname = async () => {
     if (!nickname.trim()) return;
@@ -54,9 +48,6 @@ export default function Register() {
 
   /**
    * validateForm: 폼 유효성 검사
-   * - 닉네임 중복 확인 여부
-   * - 비밀번호 일치 여부
-   * @returns {boolean} 유효성 검사 통과 여부
    */
   const validateForm = () => {
     // 닉네임 중복 확인 체크
@@ -96,8 +87,6 @@ export default function Register() {
 
   /**
    * handleRegister: 회원가입 처리
-   * - 유효성 검사 후 백엔드에 회원가입 요청
-   * - 성공 시 완료 모달 표시
    */
   const handleRegister = async (e) => {
     e.preventDefault();

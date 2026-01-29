@@ -33,8 +33,8 @@ axiosInstance.interceptors.request.use(
 
 /**
  * 응답 인터셉터: 401/403 에러 발생 시 토큰 재발급 시도
- * - 401 Unauthorized: accessToken 만료 (구글참고)
- * - 403 Forbidden: 권한 없음 (토큰 만료로도 발생 가능) (구글참고)
+ * - 401 Unauthorized: accessToken 만료
+ * - 403 Forbidden: 권한 없음 (토큰 만료로도 발생 가능)
  * - refreshToken으로 새 accessToken 발급 후 원래 요청 재시도
  * - 재발급 실패 시 세션 만료 처리 (로그아웃)
  */

@@ -2,16 +2,13 @@ import { Inbox, Truck, CheckCircle } from "lucide-react";
 
 /**
  * TrackDetail: 배송 상세 정보 컴포넌트
- * - 배송 현황 프로그레스 바 (3단계: 상품접수 → 이동중 → 배송완료)
- * - 배송 이력 타임라인 (최신 이력이 위에 표시)
- * - 배송지 주소 및 현재 상태 표시
- * 
- * Object data - 배송 조회 API 응답 데이터
- * Object data.lastStateDetail - 마지막 배송 상태
- * Array data.trackingDetails - 배송 이력 배열
- * string data.receiverAddr - 수취인 주소
+ * - 배송 현황 프로그레스 바 (일단 3단계: 상품접수 → 이동중 → 배송완료)
+ * data.lastStateDetail - 마지막 배송 상태
+ * data.trackingDetails - 배송 이력 배열
+ * data.receiverAddr - 수취인 주소
  */
 export default function TrackDetail({ data }) {
+  console.log(data);
   const { lastStateDetail, trackingDetails, receiverAddr } = data;
   
   // 프로그레스 바 단계별 아이콘

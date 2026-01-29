@@ -51,7 +51,6 @@ function buildCommentTree(comments) {
         parent.children.push(node);
       } else {
         // 부모를 찾지 못하면 안전하게 루트로 처리
-        // (데이터 정합성 문제 대비)
         roots.push(node);
       }
     }
@@ -62,8 +61,8 @@ function buildCommentTree(comments) {
 
 /**
  * 상대 시간 계산 함수 ("방금 전", "5분 전", "2시간 전" 등)
- * @param {string} dateString - ISO 형식의 날짜 문자열
- * @returns {string} 상대 시간 표현
+ * string dateString - ISO 형식의 날짜 문자열
+ * returns string 상대 시간 표현
  */
 function getRelativeTime(dateString) {
   const now = new Date();
@@ -82,22 +81,14 @@ function getRelativeTime(dateString) {
 }
 
 /**
- * CommentItem: 댓글 렌더링 컴포넌트 (재귀적으로 대댓글 표시)
+ * CommentItem: 댓글 렌더링
  * 
- * UI 개선:
- * - 대댓글 왼쪽은 들여쓰기, 오른쪽 끝은 첫 댓글과 정렬
- * - depth > 0인 경우 "@답글대상" 표시
- * - 상대 시간 표시 ("5분 전", "2시간 전" 등)
- * - 접기/펼치기 기능 (자식 댓글이 있는 경우)
- * - 답글 버튼 (무한 뎁스 지원)
- * - 삭제된 댓글 처리 (deleted === true)
- * 
- * @param {Object} comment - 댓글 객체 (children 배열 포함, deleted 필드 포함)
- * @param {number} depth - 현재 뎁스 (0부터 시작, 루트 댓글 = 0)
- * @param {Function} onReply - 답글 버튼 클릭 시 실행될 콜백
- * @param {Function} onDelete - 댓글 삭제 콜백
- * @param {string} parentNickname - 부모 댓글 작성자 닉네임 (답글 대상 표시용)
- * @param {Object} currentUser - 현재 로그인한 사용자 정보
+ * Object comment - 댓글 객체 (children 배열 포함, deleted 필드 포함)
+ * number depth - 현재 뎁스 (0부터 시작, 루트 댓글 = 0)
+ * Function onReply - 답글 버튼 클릭 시 실행될 콜백
+ * Function onDelete - 댓글 삭제 콜백
+ * string parentNickname - 부모 댓글 작성자 닉네임 (답글 대상 표시용)
+ * Object currentUser - 현재 로그인한 사용자 정보
  */
 function CommentItem({ comment, depth = 0, onReply, onDelete, parentNickname = null, currentUser = null }) {
   const [collapsed, setCollapsed] = useState(false); // 자식 댓글 접기/펼치기 상태
@@ -205,15 +196,6 @@ function CommentItem({ comment, depth = 0, onReply, onDelete, parentNickname = n
 
 /**
  * PostDetail: 게시글 상세 페이지
- * 
- * 주요 기능:
- * 1. 게시글 상세 정보 표시 (제목, 내용, 작성자, 작성일)
- * 2. 게시글 수정/삭제 (작성자만 가능 - 백엔드에서 검증)
- * 3. 계층형 댓글 시스템 (무한 뎁스 지원)
- *    - 일반 댓글 작성
- *    - 대댓글, 대대댓글 작성 (parentId 사용)
- *    - 댓글 트리 구조 렌더링
- *    - 접기/펼치기 기능
  */
 export default function PostDetail() {
   const { id } = useParams(); // URL 파라미터에서 게시글 ID 추출

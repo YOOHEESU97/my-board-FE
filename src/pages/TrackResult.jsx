@@ -4,9 +4,6 @@ import TrackDetail from "./TrackDetail";
 
 /**
  * TrackResult: 배송 조회 결과 페이지
- * - TrackDelivery 페이지에서 React Router의 state로 전달받은 배송 정보 표시
- * - TrackDetail 컴포넌트로 상세 정보 렌더링
- * - state가 없으면 (직접 URL 접근 시) 에러 메시지 표시
  */
 export default function TrackResult() {
   const location = useLocation();

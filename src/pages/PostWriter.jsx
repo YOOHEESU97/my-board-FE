@@ -7,9 +7,6 @@ import Modal from "../components/Modal";
 
 /**
  * PostWrite: 게시글 작성 페이지
- * - 제목, 내용 입력 폼
- * - 유효성 검사 (빈 값 방지)
- * - 작성 완료 시 모달 표시 후 게시판 목록으로 이동
  */
 export default function PostWrite() {
   const [title, setTitle] = useState("");
@@ -22,8 +19,6 @@ export default function PostWrite() {
 
   /**
    * handleSubmit: 게시글 작성 처리
-   * - 유효성 검사 후 백엔드에 게시글 작성 요청
-   * - 성공 시 완료 모달 표시
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,7 +46,6 @@ export default function PostWrite() {
 
   /**
    * validateForm: 폼 유효성 검사
-   * - 제목과 내용이 비어있지 않은지 확인
    */
   const validateForm = () => {
     if (!title.trim()) {
@@ -67,7 +61,6 @@ export default function PostWrite() {
 
   /**
    * resetForm: 폼 초기화
-   * - 작성 완료 후 입력 필드 비우기
    */
   const resetForm = () => {
     setTitle("");

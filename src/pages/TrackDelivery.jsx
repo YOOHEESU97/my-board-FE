@@ -7,11 +7,6 @@ import Modal from "../components/Modal";
 
 /**
  * TrackDelivery: 배송 조회 페이지
- * - 택배사 선택 (CarrierCombobox)
- * - 운송장 번호 입력
- * - 조회 버튼 클릭 시 배송 정보 API 호출
- * - 성공 시 결과 페이지로 이동 (state로 데이터 전달)
- * - 실패 시 에러 모달 표시
  */
 export default function TrackDelivery() {
   const [invoiceNumber, setInvoiceNumber] = useState("");
@@ -23,9 +18,6 @@ export default function TrackDelivery() {
 
   /**
    * handleSubmit: 배송 조회 처리
-   * - 택배사 코드와 운송장 번호로 배송 정보 조회
-   * - 성공 시 결과 페이지로 이동 (React Router state 사용)
-   * - 실패 시 에러 모달 표시
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
