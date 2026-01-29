@@ -1,4 +1,17 @@
+/**
+ * deliveryCompanies: 택배사 목록 상수
+ * - 한국의 주요 택배사 및 국제 특송 업체 정보
+ * - CarrierCombobox 컴포넌트에서 사용
+ * - 총 136개의 택배사 정보 포함
+ * 
+ * 데이터 구조:
+ * - name: 택배사 이름 (한글/영문)
+ * - code: 택배사 코드 (배송 조회 API에서 사용)
+ * 
+ * 출처: tracker.delivery API 택배사 코드 기준
+ */
 const deliveryCompanies = [
+  // 국내 주요 택배사
   { name: "우체국택배", code: "01" },
   { name: "CJ대한통운", code: "04" },
   { name: "한진택배", code: "05" },

@@ -1,36 +1,56 @@
-// PostDetail.jsx
-
 import { useNavigate, useParams } from "react-router-dom";
-import { useCallback, useEffect, useMemo, useState } from "react"; // ✅ useMemo 추가
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { getPostById, deletePostById } from "../api/post";
-import { fetchComments, createComment } from "../api/comment"; // ✅ 댓글 관련
+import { fetchComments, createComment } from "../api/comment";
 import Modal from "../components/Modal";
 import ConfirmModal from "../components/ConfirmModal";
 
 /**
- * ✅ flat한 comments 배열을 트리 구조로 변환하는 유틸 함수
- *    - parentId === null → 루트 댓글
- *    - 나머지는 parentId 기준으로 부모의 children에 붙임
+ * buildCommentTree: flat한 댓글 배열을 계층 구조(트리)로 변환
+ * 
+ * - 백엔드에서 받은 댓글 배열은 flat 구조 (parentId로 부모-자식 관계 표현)
+ * - 이 함수는 parentId를 기준으로 트리 구조로 재구성
+ * 
+ * @param {Array} comments - flat 구조의 댓글 배열
+ * @returns {Array} 루트 댓글 배열 (children 속성에 대댓글 포함)
+ * 
+ * 예시:
+ * 입력: [
+ *   { id: 1, parentId: null, content: "댓글1" },
+ *   { id: 2, parentId: 1, content: "대댓글1-1" },
+ *   { id: 3, parentId: null, content: "댓글2" }
+ * ]
+ * 
+ * 출력: [
+ *   { id: 1, parentId: null, content: "댓글1", children: [
+ *     { id: 2, parentId: 1, content: "대댓글1-1", children: [] }
+ *   ]},
+ *   { id: 3, parentId: null, content: "댓글2", children: [] }
+ * ]
  */
 function buildCommentTree(comments) {
   const map = new Map();
   const roots = [];
 
-  // 각 댓글을 node로 감싸고 children 배열 추가
+  // 1단계: 모든 댓글을 Map에 저장하고 children 배열 초기화
   comments.forEach((c) => {
     map.set(c.id, { ...c, children: [] });
   });
 
-  // parentId에 따라 부모 밑에 붙이기
+  // 2단계: parentId를 기준으로 부모-자식 관계 구성
   map.forEach((node) => {
     if (node.parentId == null) {
+      // parentId가 null이면 루트 댓글
       roots.push(node);
     } else {
+      // parentId가 있으면 해당 부모의 children에 추가
       const parent = map.get(node.parentId);
       if (parent) {
         parent.children.push(node);
       } else {
-        // 부모를 못 찾는 데이터는 안전하게 루트로 처리
+        // 부모를 찾지 못하면 안전하게 루트로 처리
+        // (데이터 정합성 문제 대비)
         roots.push(node);
       }
     }
@@ -40,15 +60,21 @@ function buildCommentTree(comments) {
 }
 
 /**
- * ✅ 재귀적으로 댓글 + 자식 댓글(대댓글/대대댓글...)을 렌더링하는 컴포넌트
- *  - depth 에 따라 좌측 인덴트/라인을 넣어서 트리 느낌을 줌
- *  - onReply: "이 댓글에 답글" 눌렀을 때 부모 정보 전달 콜백
+ * CommentItem: 댓글 렌더링 컴포넌트 (재귀적으로 대댓글 표시)
+ * 
+ * - depth에 따라 들여쓰기 (트리 구조 시각화)
+ * - 접기/펼치기 기능 (자식 댓글이 있는 경우)
+ * - 답글 버튼 (무한 뎁스 지원)
+ * 
+ * @param {Object} comment - 댓글 객체 (children 배열 포함)
+ * @param {number} depth - 현재 뎁스 (0부터 시작, 루트 댓글 = 0)
+ * @param {Function} onReply - 답글 버튼 클릭 시 실행될 콜백
  */
 function CommentItem({ comment, depth = 0, onReply }) {
-  const [collapsed, setCollapsed] = useState(false); // 자식 접기/펼치기
+  const [collapsed, setCollapsed] = useState(false); // 자식 댓글 접기/펼치기 상태
   const hasChildren = comment.children && comment.children.length > 0;
 
-  // 뎁스에 따라 살짝씩 들여쓰기 (최대 64px까지만)
+  // 뎁스에 따른 들여쓰기 (최대 64px로 제한)
   const indentPx = Math.min(depth * 16, 64);
 
   return (
@@ -122,90 +148,125 @@ function CommentItem({ comment, depth = 0, onReply }) {
   );
 }
 
+/**
+ * PostDetail: 게시글 상세 페이지
+ * 
+ * 주요 기능:
+ * 1. 게시글 상세 정보 표시 (제목, 내용, 작성자, 작성일)
+ * 2. 게시글 수정/삭제 (작성자만 가능 - 백엔드에서 검증)
+ * 3. 계층형 댓글 시스템 (무한 뎁스 지원)
+ *    - 일반 댓글 작성
+ *    - 대댓글, 대대댓글 작성 (parentId 사용)
+ *    - 댓글 트리 구조 렌더링
+ *    - 접기/펼치기 기능
+ */
 export default function PostDetail() {
-  const { id } = useParams();
+  const { id } = useParams(); // URL 파라미터에서 게시글 ID 추출
   const nav = useNavigate();
 
+  // 게시글 관련 state
   const [post, setPost] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [deleteFlag, setDeleteFlag] = useState(false);
-  const [showDeletedModal, setShowDeletedModal] = useState(false);
+  const [showModal, setShowModal] = useState(false); // 에러 모달
+  const [deleteFlag, setDeleteFlag] = useState(false); // 삭제 확인 모달
+  const [showDeletedModal, setShowDeletedModal] = useState(false); // 삭제 완료 모달
 
-  // ✅ 댓글 관련 state
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState("");
-  const [isCommentSubmitting, setIsCommentSubmitting] = useState(false);
-  const [replyTarget, setReplyTarget] = useState(null); // { id, writerNickname }
+  // 댓글 관련 state
+  const [comments, setComments] = useState([]); // flat 구조의 댓글 배열
+  const [newComment, setNewComment] = useState(""); // 입력 중인 댓글 내용
+  const [isCommentSubmitting, setIsCommentSubmitting] = useState(false); // 댓글 제출 중 상태
+  const [replyTarget, setReplyTarget] = useState(null); // 답글 대상 { id, writerNickname }
 
-  // 로컬에 토큰 저장해두는 구조라고 가정 (없으면 댓글 입력 막기)
+  // 로그인 여부 확인 (댓글 작성 권한)
   const accessToken = localStorage.getItem("accessToken");
 
-  // 게시글 불러오기
+  /**
+   * getPost: 게시글 상세 정보 불러오기
+   */
   const getPost = useCallback(async () => {
     try {
       const res = await getPostById(id);
       setPost(res.data);
     } catch (err) {
-      console.error("게시글 불러오기 실패", err);
+      console.error("게시글 불러오기 실패:", err);
       setShowModal(true);
     }
   }, [id]);
 
-  // ✅ 댓글 불러오기
+  /**
+   * loadComments: 댓글 목록 불러오기
+   */
   const loadComments = useCallback(async () => {
     try {
       const res = await fetchComments(id);
       setComments(res.data);
     } catch (err) {
-      console.error("댓글 불러오기 실패", err);
+      console.error("댓글 불러오기 실패:", err);
     }
   }, [id]);
 
-  // 게시글 + 댓글 동시 로딩
+  // 컴포넌트 마운트 시 게시글 + 댓글 동시 로딩
   useEffect(() => {
     getPost();
     loadComments();
   }, [getPost, loadComments]);
 
+  /**
+   * handleDelete: 게시글 삭제 처리
+   */
   const handleDelete = async () => {
     try {
       await deletePostById(post.id);
       setDeleteFlag(false);
       setShowDeletedModal(true);
     } catch (error) {
-      console.error("삭제 실패", error);
+      console.error("게시글 삭제 실패:", error);
+      alert("게시글 삭제에 실패했습니다.");
     }
   };
 
-  // ✅ 댓글 등록 (일반 댓글 + 대댓글/대대댓글 공통)
+  /**
+   * handleAddComment: 댓글/대댓글 작성 처리
+   * - replyTarget이 null이면 일반 댓글 (parentId: null)
+   * - replyTarget이 있으면 대댓글 (parentId: replyTarget.id)
+   */
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
+    // 로그인 확인
     if (!accessToken) {
       alert("댓글을 작성하려면 로그인이 필요합니다.");
-      nav("/login"); // 실제 로그인 라우트에 맞게 수정
+      nav("/login");
       return;
     }
 
     try {
       setIsCommentSubmitting(true);
+      
+      // 댓글 작성 API 호출
       await createComment(id, {
         content: newComment,
-        parentId: replyTarget ? replyTarget.id : null, // ✅ 부모 댓글 id를 parentId로 전달
+        parentId: replyTarget ? replyTarget.id : null, // 답글 대상의 ID
       });
+      
+      // 입력 필드 초기화
       setNewComment("");
       setReplyTarget(null); // 답글 모드 해제
-      await loadComments(); // 최신 댓글 목록 다시 로딩
+      
+      // 최신 댓글 목록 다시 로딩
+      await loadComments();
     } catch (err) {
-      console.error("댓글 등록 실패", err);
+      console.error("댓글 등록 실패:", err);
       alert("댓글 등록에 실패했습니다.");
     } finally {
       setIsCommentSubmitting(false);
     }
   };
 
-  // ✅ 트리 구조로 변환된 댓글 (useMemo로 캐싱)
+  /**
+   * commentTree: flat 댓글 배열을 트리 구조로 변환
+   * - useMemo로 캐싱 (comments가 변경될 때만 재계산)
+   */
   const commentTree = useMemo(() => buildCommentTree(comments), [comments]);
 
   return (
