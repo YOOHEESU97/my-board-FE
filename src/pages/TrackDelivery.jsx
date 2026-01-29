@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getTrackingDelivery } from "../api/post";
+import { getTrackingDelivery } from "../api/delivery";
 import CarrierCombobox from "../components/CarrierCombobox";
 import Modal from "../components/Modal";
 

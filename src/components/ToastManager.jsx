@@ -2,7 +2,7 @@ import { toast } from "react-toastify";
 import SessionExpiredToast from "./SessionExpiredToast.jsx";
 
 /**
- * ToastManager: 토스트 알림 관리 유틸리티
+ * ToastManager: 토스트 알림 관리
  * - react-toastify를 사용한 전역 알림 시스템
  * - 세션 만료 토스트 표시 함수 제공
  */

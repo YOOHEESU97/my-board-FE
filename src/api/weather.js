@@ -8,10 +8,10 @@ const weatherKey = import.meta.env.VITE_WEATHER_API_KEY;
  * - 공공데이터포털의 동네예보 조회 서비스 사용
  * - 현재 위치 기반 날씨 정보 조회 (3시간 단위 예보)
  * 
- * @param {Object} coords - 격자 좌표
- * @param {number} coords.x - 기상청 격자 X좌표 (nx)
- * @param {number} coords.y - 기상청 격자 Y좌표 (ny)
- * @returns {Promise<Array>} 예보 항목 배열
+ * Object coords - 격자 좌표
+ * number coords.x - 기상청 격자 X좌표 (nx)
+ * number coords.y - 기상청 격자 Y좌표 (ny)
+ * Promise<Array> 예보 항목 배열
  * 
  * 반환 데이터 구조:
  * - category: 자료 구분 (TMP=기온, SKY=하늘상태, POP=강수확률 등)
@@ -28,9 +28,8 @@ export const fetchWeather = async ({ x, y }) => {
   
   /**
    * getBaseTime: 기상청 API 발표 시각 계산
-   * - 기상청은 하루 8번 예보 발표 (02:00, 05:00, 08:00, 11:00, 14:00, 17:00, 20:00, 23:00)
-   * - 현재 시각 기준으로 가장 최근 발표된 base_time 계산
-   * @returns {string} base_time (HHmm 형식)
+   * - 공공데이터포털 하루 8번 예보 발표 (02:00, 05:00, 08:00, 11:00, 14:00, 17:00, 20:00, 23:00)
+   * returns string base_time (HHmm 형식)
    */
   const getBaseTime = () => {
     const now = new Date();

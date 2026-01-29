@@ -18,11 +18,7 @@ import TrackResult from "./pages/TrackResult.jsx";
 
 /**
  * Router: 애플리케이션 라우팅 설정
- * - React Router v6 사용
- * - 모든 페이지는 Layout 컴포넌트로 감싸져 Header/Footer 공통 레이아웃 적용
- * - ProtectedRoute: 인증이 필요한 페이지 보호
- * 
- * 라우트 구조:
+ * 라우트 구조 (만들때마다 계속 추가)
  * - / : 홈으로 리다이렉트
  * - /home : 메인 홈 (보호된 라우트)
  * - /login, /register : 인증 페이지
@@ -98,7 +94,7 @@ export default function Router() {
         }
       />
       
-      {/* 홈 (보호된 라우트 - 로그인 필요) */}
+      {/* 메인 홈 */}
       <Route
         path="/home"
         element={

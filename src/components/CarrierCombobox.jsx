@@ -56,11 +56,7 @@ export default function CarrierCombobox({ selected, setSelected }) {
                 <ComboboxOption
                   key={company.code}
                   value={company.code}
-                  className={({ active }) =>
-                    `p-2 cursor-pointer transition-colors ${
-                      active ? "bg-blue-100" : "bg-white"
-                    }`
-                  }
+                  className="p-2 cursor-pointer transition-colors data-[focus]:bg-blue-100"
                 >
                   {({ selected }) => (
                     <div className="flex justify-between items-center">

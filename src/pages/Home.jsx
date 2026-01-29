@@ -64,7 +64,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center px-4 pt-6 pb-10">
+    <div className="w-full flex flex-col items-center">
       <div className="w-full max-w-md bg-gray-50 rounded-xl shadow-xl p-6 space-y-6">
         {/* 헤더 */}
         <header className="flex justify-between items-center mb-2">

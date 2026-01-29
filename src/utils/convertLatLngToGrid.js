@@ -3,9 +3,9 @@
  * - 기상청 단기예보 API는 위경도가 아닌 자체 격자 좌표계(Lambert Conformal 투영) 사용
  * - 이 함수는 GPS 좌표를 기상청 API에서 사용하는 격자 좌표로 변환
  * 
- * @param {number} lat - 위도 (latitude)
- * @param {number} lon - 경도 (longitude)
- * @returns {{ x: number, y: number }} - 기상청 격자 좌표 (nx, ny)
+ * number lat - 위도 (latitude)
+ * number lon - 경도 (longitude)
+ * returns {{ x: number, y: number }} - 기상청 격자 좌표 (nx, ny)
  * 
  * 참고: 기상청 격자 좌표 변환 알고리즘 (Lambert Conformal Conic Projection)
  * 출처: 기상청 단기예보 조회서비스 기술문서

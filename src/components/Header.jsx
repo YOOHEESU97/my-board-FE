@@ -2,17 +2,11 @@ import { useLocation } from "react-router-dom";
 
 /**
  * Header: 상단 헤더 컴포넌트 (현재 미사용)
- * - 현재 경로에 따라 페이지 제목 표시
- * - 모바일 앱 스타일의 고정 헤더
- * - Layout.jsx에서 주석 처리되어 있음 (필요시 활성화)
+ * 구상중 뭐넣지
  */
 export default function Header() {
   const { pathname } = useLocation();
 
-  /**
-   * getTitle: 현재 경로에 따른 헤더 제목 반환
-   * - 경로 패턴 매칭으로 적절한 제목 표시
-   */
   const getTitle = () => {
     if (pathname.startsWith("/posts/write")) return "글쓰기";
     if (pathname.startsWith("/posts")) return "게시판";

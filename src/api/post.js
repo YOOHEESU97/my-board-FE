@@ -46,14 +46,3 @@ export const updatedPost = (id, updatedData) =>
  * @returns {Promise} 삭제 성공 여부
  */
 export const deletePostById = (id) => axios.delete(`/posts/${id}`);
-
-/**
- * getTrackingDelivery: 배송 추적 정보 조회
- * - 백엔드를 거쳐 외부 배송 조회 API 호출
- * @param {Object} selectedCarrier - 택배사 및 운송장 정보
- * @param {string} selectedCarrier.carrier - 택배사 코드 (예: "04" = CJ대한통운)
- * @param {string} selectedCarrier.invoice - 운송장 번호
- * @returns {Promise} 배송 추적 상세 정보
- */
-export const getTrackingDelivery = (selectedCarrier) =>
-  axios.post("/getTrackingDelivery", selectedCarrier);

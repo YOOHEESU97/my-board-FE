@@ -1,20 +1,21 @@
+/* eslint-disable no-unused-vars */
 import { motion, AnimatePresence } from "framer-motion";
+/* eslint-enable no-unused-vars */
+/* 위에 주석 없으면 에러가 나진않지만 오류 메시지 나옴 */ 
 
 /**
- * Modal: 애니메이션이 있는 알림 모달 컴포넌트
+ * Modal: 알림 모달 컴포넌트
  * - 단순 알림용 (확인 버튼만 있음)
- * - framer-motion으로 부드러운 애니메이션 적용
- * - 사용처: 회원가입 완료, 게시글 작성 완료, 에러 메시지 등
+ * - 회원가입 완료, 게시글 작성 완료, 에러 메시지
  * 
- * @param {string} title - 모달 제목 (선택)
- * @param {string} message - 모달 메시지 (필수)
- * @param {Function} onClose - 확인 버튼 클릭 시 실행될 콜백
- * @param {string} confirmLabel - 확인 버튼 텍스트 (기본: "확인")
+ * string title - 모달 제목
+ * string message - 모달 메시지 (필수!)
+ * Function onClose - 확인 버튼 클릭 시 실행될 콜백
+ * string confirmLabel - 확인 버튼 텍스트 (디폴트: "확인")
  */
 const Modal = ({ title, message, onClose, confirmLabel = "확인" }) => {
   return (
     <AnimatePresence>
-      {/* 배경 어둡게 처리 (backdrop) */}
       <motion.div
         key="modal-backdrop"
         initial={{ opacity: 0 }}

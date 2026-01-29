@@ -9,8 +9,8 @@ import { updateUserFromToken } from "../utils/userUpdater";
  * - 토큰 갱신 실패 시 세션 만료 토스트 표시 후 로그아웃 처리
  */
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/api", // 백엔드 API 서버 주소
-  withCredentials: true, // 쿠키 포함 (refreshToken이 httpOnly 쿠키로 전달되는 경우 필요)
+  baseURL: "http://localhost:8080/api", // 백엔드 API 서버 주소 (로컬)
+  withCredentials: true, // 쿠키 포함
   headers: {
     "Content-Type": "application/json",
   },
@@ -33,8 +33,8 @@ axiosInstance.interceptors.request.use(
 
 /**
  * 응답 인터셉터: 401/403 에러 발생 시 토큰 재발급 시도
- * - 401 Unauthorized: accessToken 만료
- * - 403 Forbidden: 권한 없음 (토큰 만료로도 발생 가능)
+ * - 401 Unauthorized: accessToken 만료 (구글참고)
+ * - 403 Forbidden: 권한 없음 (토큰 만료로도 발생 가능) (구글참고)
  * - refreshToken으로 새 accessToken 발급 후 원래 요청 재시도
  * - 재발급 실패 시 세션 만료 처리 (로그아웃)
  */
