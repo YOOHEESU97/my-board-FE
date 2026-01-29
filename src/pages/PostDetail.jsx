@@ -60,41 +60,69 @@ function buildCommentTree(comments) {
 }
 
 /**
+ * 상대 시간 계산 함수 ("방금 전", "5분 전", "2시간 전" 등)
+ * @param {string} dateString - ISO 형식의 날짜 문자열
+ * @returns {string} 상대 시간 표현
+ */
+function getRelativeTime(dateString) {
+  const now = new Date();
+  const past = new Date(dateString);
+  const diffMs = now - past;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffSec < 60) return "방금 전";
+  if (diffMin < 60) return `${diffMin}분 전`;
+  if (diffHour < 24) return `${diffHour}시간 전`;
+  if (diffDay < 7) return `${diffDay}일 전`;
+  return past.toLocaleDateString("ko-KR");
+}
+
+/**
  * CommentItem: 댓글 렌더링 컴포넌트 (재귀적으로 대댓글 표시)
  * 
- * - depth에 따라 들여쓰기 (트리 구조 시각화)
+ * UI 개선:
+ * - 대댓글 왼쪽은 들여쓰기, 오른쪽 끝은 첫 댓글과 정렬
+ * - depth > 0인 경우 "@답글대상" 표시
+ * - 상대 시간 표시 ("5분 전", "2시간 전" 등)
  * - 접기/펼치기 기능 (자식 댓글이 있는 경우)
  * - 답글 버튼 (무한 뎁스 지원)
  * 
  * @param {Object} comment - 댓글 객체 (children 배열 포함)
  * @param {number} depth - 현재 뎁스 (0부터 시작, 루트 댓글 = 0)
  * @param {Function} onReply - 답글 버튼 클릭 시 실행될 콜백
+ * @param {string} parentNickname - 부모 댓글 작성자 닉네임 (답글 대상 표시용)
  */
-function CommentItem({ comment, depth = 0, onReply }) {
+function CommentItem({ comment, depth = 0, onReply, parentNickname = null }) {
   const [collapsed, setCollapsed] = useState(false); // 자식 댓글 접기/펼치기 상태
   const hasChildren = comment.children && comment.children.length > 0;
 
-  // 뎁스에 따른 들여쓰기 (최대 64px로 제한)
-  const indentPx = Math.min(depth * 16, 64);
+  // 들여쓰기는 최대 1단계만 (16px)
+  const indentPx = depth > 0 ? 16 : 0;
 
   return (
-    <li className="relative">
-      <div
-        className="flex flex-col gap-1 py-2 pr-2"
-        style={{ marginLeft: indentPx }}
-      >
-        {/* ✅ depth >= 1 인 경우에만 왼쪽에 세로 라인 표시 (트리 느낌) */}
-        {depth > 0 && (
-          <div className="absolute left-0 top-0 bottom-0 border-l border-gray-200 pointer-events-none" />
-        )}
-
+    <li>
+      <div className="flex flex-col gap-1 py-2" style={{ paddingLeft: indentPx }}>
         {/* 댓글 카드 */}
         <div className="border rounded px-3 py-2 bg-white shadow-sm">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-semibold">
-              {comment.writerNickname} ({comment.writerEmail})
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-semibold">
+                {comment.writerNickname}
+              </span>
+              {/* depth > 0이면 답글 대상 표시 */}
+              {depth > 0 && parentNickname && (
+                <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                  → @{parentNickname}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
+              <span className="text-[10px] text-gray-400">
+                {getRelativeTime(comment.createdAt)}
+              </span>
               {/* 자식이 있는 경우, 접기/펼치기 토글 버튼 */}
               {hasChildren && (
                 <button
@@ -105,9 +133,6 @@ function CommentItem({ comment, depth = 0, onReply }) {
                   {collapsed ? "펼치기" : "접기"}
                 </button>
               )}
-              <span className="text-[10px] text-gray-400">
-                {new Date(comment.createdAt).toLocaleString("ko-KR")}
-              </span>
             </div>
           </div>
 
@@ -115,7 +140,7 @@ function CommentItem({ comment, depth = 0, onReply }) {
             {comment.content}
           </p>
 
-          {/* ✅ 어느 뎁스에서든 답글 가능 → 무한 뎁스 지원 */}
+          {/* 답글 버튼 */}
           <button
             type="button"
             className="text-[11px] text-blue-500 hover:underline"
@@ -139,6 +164,7 @@ function CommentItem({ comment, depth = 0, onReply }) {
                 comment={child}
                 depth={depth + 1}
                 onReply={onReply}
+                parentNickname={comment.writerNickname} // 부모 닉네임 전달
               />
             ))}
           </ul>

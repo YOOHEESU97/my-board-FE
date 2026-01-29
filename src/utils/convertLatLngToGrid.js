@@ -7,7 +7,7 @@
  * number lon - 경도 (longitude)
  * returns {{ x: number, y: number }} - 기상청 격자 좌표 (nx, ny)
  * 
- * 참고: 기상청 격자 좌표 변환 알고리즘 (Lambert Conformal Conic Projection)
+ * 참고: 기상청 격자 좌표 변환 알고리즘
  * 출처: 기상청 단기예보 조회서비스 기술문서
  */
 export function convertLatLngToGrid(lat, lon) {

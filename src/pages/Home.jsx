@@ -1,67 +1,18 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { useUser } from "../context/AppContext";
-import { fetchWeather } from "../api/weather";
-import { convertLatLngToGrid } from "../utils/convertLatLngToGrid";
-import {
-  groupForecastItems,
-  getNextForecastItem,
-} from "../utils/forecastUtils";
+import { useWeather } from "../hooks/useWeather";
 
 /**
  * Home: 메인 홈 페이지 컴포넌트
  * - 사용자 정보 표시
- * - 현재 위치 기반 날씨 정보 (기상청 API)
+ * - 현재 위치 기반 날씨 정보 (useWeather 훅 사용)
  * - 빠른 이동 버튼 (게시판, 배송 조회)
  * - 최근 활동 내역 (현재는 하드코딩된 예시 데이터)
- * 
- * 기능:
- * 1. GPS로 현재 위치 가져오기
- * 2. 위경도 → 기상청 격자 좌표 변환
- * 3. 기상청 API로 날씨 정보 조회
- * 4. 현재 시각 이후 가장 가까운 예보 표시
  */
 export default function Home() {
   const nav = useNavigate();
   const { user } = useUser();
-  const [weather, setWeather] = useState(null);
-
-  /**
-   * 날씨 정보 로드
-   * - 브라우저 Geolocation API로 현재 위치 가져오기
-   * - 위경도를 기상청 격자 좌표로 변환
-   * - 기상청 단기예보 API 호출
-   * - 현재 시각 이후 가장 가까운 예보 추출
-   */
-  useEffect(() => {
-    // 사용자 위치 권한 요청 및 날씨 정보 가져오기
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        
-        // 위경도를 기상청 격자 좌표로 변환
-        const { x, y } = convertLatLngToGrid(latitude, longitude);
-        
-        try {
-          // 기상청 API 호출
-          const weatherItems = await fetchWeather({ x, y });
-          
-          // 날짜+시간별로 그룹화
-          const grouped = groupForecastItems(weatherItems);
-          
-          // 현재 시각 이후 첫 번째 예보 추출
-          const next = getNextForecastItem(grouped);
-          setWeather(next);
-        } catch (err) {
-          console.error("날씨 정보 불러오기 실패:", err);
-        }
-      },
-      (error) => {
-        console.error("위치 정보 가져오기 실패:", error);
-      }
-    );
-  }, []);
+  const { weather, isLoading, error } = useWeather();
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -80,8 +31,20 @@ export default function Home() {
         <div className="flex justify-between items-center text-lg font-semibold text-gray-800">
           <span>{user?.nickname} 님, 환영합니다 👋</span>
           
-          {/* 날씨 정보 (로드되면 표시) */}
-          {weather && (
+          {/* 날씨 정보 조건부 렌더링 true면 로딩중*/}
+          {isLoading && (
+            <span className="text-sm bg-gray-100 text-gray-500 px-3 py-1 rounded-full ml-4 whitespace-nowrap">
+              ⏳ 날씨 로딩중...
+            </span>
+          )}
+          
+          {error && (
+            <span className="text-sm bg-red-100 text-red-600 px-3 py-1 rounded-full ml-4 whitespace-nowrap">
+              ❌ 날씨 정보 불러오기 실패
+            </span>
+          )}
+          
+          {weather && !isLoading && !error && (
             <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full ml-4 whitespace-nowrap">
               {/* SKY: 하늘상태 (1=맑음, 3=구름많음, 4=흐림) */}
               {{
@@ -118,8 +81,8 @@ export default function Home() {
           </button>
         </section>
 
-        {/* 최근 활동 (임시 하드코딩 데이터) */}
-        {/* TODO: 실제 데이터는 localStorage나 백엔드에서 가져와야 함 */}
+        {/* 최근 활동 (하드코딩 데이터) */}
+        {/* 뭐 넣을지 고민중 */}
         <section className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-semibold text-gray-600">📌 최근 활동</h3>
           <p className="text-sm text-gray-500 mt-2">

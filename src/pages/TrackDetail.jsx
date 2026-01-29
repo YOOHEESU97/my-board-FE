@@ -6,10 +6,10 @@ import { Inbox, Truck, CheckCircle } from "lucide-react";
  * - 배송 이력 타임라인 (최신 이력이 위에 표시)
  * - 배송지 주소 및 현재 상태 표시
  * 
- * @param {Object} data - 배송 조회 API 응답 데이터
- * @param {Object} data.lastStateDetail - 마지막 배송 상태
- * @param {Array} data.trackingDetails - 배송 이력 배열
- * @param {string} data.receiverAddr - 수취인 주소
+ * Object data - 배송 조회 API 응답 데이터
+ * Object data.lastStateDetail - 마지막 배송 상태
+ * Array data.trackingDetails - 배송 이력 배열
+ * string data.receiverAddr - 수취인 주소
  */
 export default function TrackDetail({ data }) {
   const { lastStateDetail, trackingDetails, receiverAddr } = data;
