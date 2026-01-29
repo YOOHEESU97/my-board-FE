@@ -2,7 +2,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { getPostById, deletePostById } from "../api/post";
-import { fetchComments, createComment } from "../api/comment";
+import { fetchComments, createComment, deleteComment } from "../api/comment";
+import { useUser } from "../context/AppContext";
 import Modal from "../components/Modal";
 import ConfirmModal from "../components/ConfirmModal";
 
@@ -89,15 +90,20 @@ function getRelativeTime(dateString) {
  * - 상대 시간 표시 ("5분 전", "2시간 전" 등)
  * - 접기/펼치기 기능 (자식 댓글이 있는 경우)
  * - 답글 버튼 (무한 뎁스 지원)
+ * - 삭제된 댓글 처리 (deleted === true)
  * 
- * @param {Object} comment - 댓글 객체 (children 배열 포함)
+ * @param {Object} comment - 댓글 객체 (children 배열 포함, deleted 필드 포함)
  * @param {number} depth - 현재 뎁스 (0부터 시작, 루트 댓글 = 0)
  * @param {Function} onReply - 답글 버튼 클릭 시 실행될 콜백
+ * @param {Function} onDelete - 댓글 삭제 콜백
  * @param {string} parentNickname - 부모 댓글 작성자 닉네임 (답글 대상 표시용)
+ * @param {Object} currentUser - 현재 로그인한 사용자 정보
  */
-function CommentItem({ comment, depth = 0, onReply, parentNickname = null }) {
+function CommentItem({ comment, depth = 0, onReply, onDelete, parentNickname = null, currentUser = null }) {
   const [collapsed, setCollapsed] = useState(false); // 자식 댓글 접기/펼치기 상태
   const hasChildren = comment.children && comment.children.length > 0;
+  const isDeleted = comment.deleted; // 삭제된 댓글 여부
+  const isOwner = currentUser && comment.writerEmail === currentUser.email; // 본인 댓글 여부
 
   // 들여쓰기는 최대 1단계만 (16px)
   const indentPx = depth > 0 ? 16 : 0;
@@ -106,14 +112,18 @@ function CommentItem({ comment, depth = 0, onReply, parentNickname = null }) {
     <li>
       <div className="flex flex-col gap-1 py-2" style={{ paddingLeft: indentPx }}>
         {/* 댓글 카드 */}
-        <div className="border rounded px-3 py-2 bg-white shadow-sm">
+        <div className={`border rounded px-3 py-2 shadow-sm ${
+          isDeleted ? "bg-gray-100" : "bg-white"
+        }`}>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-semibold">
-                {comment.writerNickname}
+              <span className={`text-xs font-semibold ${
+                isDeleted ? "text-gray-400" : ""
+              }`}>
+                {isDeleted ? "알 수 없음" : comment.writerNickname}
               </span>
               {/* depth > 0이면 답글 대상 표시 */}
-              {depth > 0 && parentNickname && (
+              {!isDeleted && depth > 0 && parentNickname && (
                 <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
                   → @{parentNickname}
                 </span>
@@ -136,23 +146,40 @@ function CommentItem({ comment, depth = 0, onReply, parentNickname = null }) {
             </div>
           </div>
 
-          <p className="text-sm text-gray-800 whitespace-pre-wrap mb-1">
-            {comment.content}
+          {/* 댓글 내용 또는 삭제 메시지 */}
+          <p className={`text-sm whitespace-pre-wrap mb-1 ${
+            isDeleted ? "text-gray-400 italic" : "text-gray-800"
+          }`}>
+            {isDeleted ? "삭제 처리된 댓글입니다." : comment.content}
           </p>
 
-          {/* 답글 버튼 */}
-          <button
-            type="button"
-            className="text-[11px] text-blue-500 hover:underline"
-            onClick={() =>
-              onReply({
-                id: comment.id,
-                writerNickname: comment.writerNickname,
-              })
-            }
-          >
-            ↪️ 답글
-          </button>
+          {/* 답글 버튼 (삭제된 댓글은 비활성화) */}
+          <div className="flex items-center gap-2">
+            {!isDeleted && (
+              <button
+                type="button"
+                className="text-[11px] text-blue-500 hover:underline"
+                onClick={() =>
+                  onReply({
+                    id: comment.id,
+                    writerNickname: comment.writerNickname,
+                  })
+                }
+              >
+                ↪️ 답글
+              </button>
+            )}
+            {/* 삭제 버튼 (본인 댓글이고, 삭제되지 않은 경우만) */}
+            {!isDeleted && isOwner && (
+              <button
+                type="button"
+                className="text-[11px] text-red-500 hover:underline"
+                onClick={() => onDelete(comment.id)}
+              >
+                🗑️ 삭제
+              </button>
+            )}
+          </div>
         </div>
 
         {/* 자식 댓글들 (대댓글/대대댓글...) */}
@@ -164,7 +191,9 @@ function CommentItem({ comment, depth = 0, onReply, parentNickname = null }) {
                 comment={child}
                 depth={depth + 1}
                 onReply={onReply}
+                onDelete={onDelete}
                 parentNickname={comment.writerNickname} // 부모 닉네임 전달
+                currentUser={currentUser}
               />
             ))}
           </ul>
@@ -189,6 +218,7 @@ function CommentItem({ comment, depth = 0, onReply, parentNickname = null }) {
 export default function PostDetail() {
   const { id } = useParams(); // URL 파라미터에서 게시글 ID 추출
   const nav = useNavigate();
+  const { user } = useUser(); // 현재 로그인한 사용자 정보
 
   // 게시글 관련 state
   const [post, setPost] = useState(null);
@@ -201,6 +231,7 @@ export default function PostDetail() {
   const [newComment, setNewComment] = useState(""); // 입력 중인 댓글 내용
   const [isCommentSubmitting, setIsCommentSubmitting] = useState(false); // 댓글 제출 중 상태
   const [replyTarget, setReplyTarget] = useState(null); // 답글 대상 { id, writerNickname }
+  const [deleteCommentId, setDeleteCommentId] = useState(null); // 삭제 확인 모달용 댓글 ID
 
   // 로그인 여부 확인 (댓글 작성 권한)
   const accessToken = localStorage.getItem("accessToken");
@@ -286,6 +317,23 @@ export default function PostDetail() {
       alert("댓글 등록에 실패했습니다.");
     } finally {
       setIsCommentSubmitting(false);
+    }
+  };
+
+  /**
+   * handleDeleteComment: 댓글 삭제 처리 (soft delete)
+   * - 실제로 삭제하지 않고 deleted 필드를 true로 변경
+   */
+  const handleDeleteComment = async () => {
+    if (!deleteCommentId) return;
+
+    try {
+      await deleteComment(id, deleteCommentId);
+      setDeleteCommentId(null); // 모달 닫기
+      await loadComments(); // 최신 댓글 목록 다시 로딩
+    } catch (err) {
+      console.error("댓글 삭제 실패:", err);
+      alert("댓글 삭제에 실패했습니다.");
     }
   };
 
@@ -390,6 +438,8 @@ export default function PostDetail() {
                   comment={c}
                   depth={0}
                   onReply={setReplyTarget} // 어떤 댓글이든 답글 타겟으로 지정
+                  onDelete={setDeleteCommentId} // 삭제 버튼 클릭 시 확인 모달 표시
+                  currentUser={user} // 현재 사용자 정보 전달
                 />
               ))}
             </ul>
@@ -426,6 +476,18 @@ export default function PostDetail() {
           message="게시글이 삭제되었습니다."
           confirmLabel="확인"
           onClose={() => nav("/posts")}
+        />
+      )}
+
+      {/* 댓글 삭제 확인 모달 */}
+      {deleteCommentId && (
+        <ConfirmModal
+          title="댓글을 삭제하시겠어요?"
+          message="삭제된 댓글은 '삭제 처리된 댓글입니다.'로 표시됩니다."
+          confirmLabel="삭제하기"
+          cancelLabel="취소"
+          onConfirm={handleDeleteComment}
+          onCancel={() => setDeleteCommentId(null)}
         />
       )}
     </div>

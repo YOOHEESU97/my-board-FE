@@ -18,3 +18,13 @@ export const fetchComments = (postId) => axios.get(`/posts/${postId}/comments`);
  */
 export const createComment = (postId, { content, parentId = null }) =>
   axios.post(`/posts/${postId}/comments`, { content, parentId });
+
+/**
+ * deleteComment: 댓글 삭제 (soft delete)
+ * - 실제로 삭제하지 않고 deleted 필드를 true로 변경
+ * - 삭제된 댓글은 "삭제 처리된 댓글입니다."로 표시
+ * number postId - 게시글 ID
+ * number commentId - 댓글 ID
+ */
+export const deleteComment = (postId, commentId) =>
+  axios.delete(`/posts/${postId}/comments/${commentId}`);

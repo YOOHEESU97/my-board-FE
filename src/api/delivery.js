@@ -1,8 +1,8 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 /**
- * 배송 추적 관련 API 함수 (현재 미사용)
- * - 프론트엔드에서 직접 외부 API 호출하는 방식
+ * 배송 추적 관련 API 함수
+ * - 백엔드 프록시를 통해 외부 배송 조회 API 호출
  */
 
 /**
@@ -14,4 +14,4 @@ import axios from "axios";
  * Promise 배송 추적 상세 정보
  */
 export const getTrackingDelivery = (selectedCarrier) =>
-  axios.post("/getTrackingDelivery", selectedCarrier);
+  axiosInstance.post("/getTrackingDelivery", selectedCarrier);
