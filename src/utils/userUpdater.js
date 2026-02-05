@@ -12,7 +12,6 @@ let externalSetUser = null;
 /**
  * setUserSetter: Context의 setUser 함수를 등록
  * - App.jsx에서 useEffect로 초기화 시 호출
- * @param {Function} fn - Context의 setUser 함수
  */
 export const setUserSetter = (fn) => {
   externalSetUser = fn;
@@ -21,7 +20,6 @@ export const setUserSetter = (fn) => {
 /**
  * updateUserFromToken: JWT 토큰에서 사용자 정보를 추출하여 Context 업데이트
  * - accessToken 갱신 시 자동으로 user 정보 동기화
- * @param {string} token - 새로 발급받은 JWT accessToken
  */
 export const updateUserFromToken = (token) => {
   if (!externalSetUser) return;

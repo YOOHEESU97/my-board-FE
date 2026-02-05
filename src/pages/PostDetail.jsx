@@ -8,32 +8,11 @@ import Modal from "../components/Modal";
 import ConfirmModal from "../components/ConfirmModal";
 
 /**
- * buildCommentTree: flat한 댓글 배열을 계층 구조(트리)로 변환
- * 
- * - 백엔드에서 받은 댓글 배열은 flat 구조 (parentId로 부모-자식 관계 표현)
- * - 이 함수는 parentId를 기준으로 트리 구조로 재구성
- * 
- * @param {Array} comments - flat 구조의 댓글 배열
- * @returns {Array} 루트 댓글 배열 (children 속성에 대댓글 포함)
- * 
- * 예시:
- * 입력: [
- *   { id: 1, parentId: null, content: "댓글1" },
- *   { id: 2, parentId: 1, content: "대댓글1-1" },
- *   { id: 3, parentId: null, content: "댓글2" }
- * ]
- * 
- * 출력: [
- *   { id: 1, parentId: null, content: "댓글1", children: [
- *     { id: 2, parentId: 1, content: "대댓글1-1", children: [] }
- *   ]},
- *   { id: 3, parentId: null, content: "댓글2", children: [] }
- * ]
+ * buildCommentTree: 댓글 배열
  */
 function buildCommentTree(comments) {
   const map = new Map();
   const roots = [];
-
   // 1단계: 모든 댓글을 Map에 저장하고 children 배열 초기화
   comments.forEach((c) => {
     map.set(c.id, { ...c, children: [] });
@@ -82,7 +61,7 @@ function getRelativeTime(dateString) {
 
 /**
  * CommentItem: 댓글 렌더링
- * 
+ *
  * Object comment - 댓글 객체 (children 배열 포함, deleted 필드 포함)
  * number depth - 현재 뎁스 (0부터 시작, 루트 댓글 = 0)
  * Function onReply - 답글 버튼 클릭 시 실행될 콜백
@@ -90,7 +69,14 @@ function getRelativeTime(dateString) {
  * string parentNickname - 부모 댓글 작성자 닉네임 (답글 대상 표시용)
  * Object currentUser - 현재 로그인한 사용자 정보
  */
-function CommentItem({ comment, depth = 0, onReply, onDelete, parentNickname = null, currentUser = null }) {
+function CommentItem({
+  comment,
+  depth = 0,
+  onReply,
+  onDelete,
+  parentNickname = null,
+  currentUser = null,
+}) {
   const [collapsed, setCollapsed] = useState(false); // 자식 댓글 접기/펼치기 상태
   const hasChildren = comment.children && comment.children.length > 0;
   const isDeleted = comment.deleted; // 삭제된 댓글 여부
@@ -101,16 +87,23 @@ function CommentItem({ comment, depth = 0, onReply, onDelete, parentNickname = n
 
   return (
     <li>
-      <div className="flex flex-col gap-1 py-2" style={{ paddingLeft: indentPx }}>
+      <div
+        className="flex flex-col gap-1 py-2"
+        style={{ paddingLeft: indentPx }}
+      >
         {/* 댓글 카드 */}
-        <div className={`border rounded px-3 py-2 shadow-sm ${
-          isDeleted ? "bg-gray-100" : "bg-white"
-        }`}>
+        <div
+          className={`border rounded px-3 py-2 shadow-sm ${
+            isDeleted ? "bg-gray-100" : "bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs font-semibold ${
-                isDeleted ? "text-gray-400" : ""
-              }`}>
+              <span
+                className={`text-xs font-semibold ${
+                  isDeleted ? "text-gray-400" : ""
+                }`}
+              >
                 {isDeleted ? "알 수 없음" : comment.writerNickname}
               </span>
               {/* depth > 0이면 답글 대상 표시 */}
@@ -138,9 +131,11 @@ function CommentItem({ comment, depth = 0, onReply, onDelete, parentNickname = n
           </div>
 
           {/* 댓글 내용 또는 삭제 메시지 */}
-          <p className={`text-sm whitespace-pre-wrap mb-1 ${
-            isDeleted ? "text-gray-400 italic" : "text-gray-800"
-          }`}>
+          <p
+            className={`text-sm whitespace-pre-wrap mb-1 ${
+              isDeleted ? "text-gray-400 italic" : "text-gray-800"
+            }`}
+          >
             {isDeleted ? "삭제 처리된 댓글입니다." : comment.content}
           </p>
 
@@ -254,12 +249,44 @@ export default function PostDetail() {
    */
   const handleDelete = async () => {
     try {
+      console.log("삭제 요청 - 게시글 ID:", post.id);
+      console.log("현재 사용자:", user);
+      console.log("게시글 작성자 이메일:", post.email);
+
       await deletePostById(post.id);
       setDeleteFlag(false);
       setShowDeletedModal(true);
     } catch (error) {
-      console.error("게시글 삭제 실패:", error);
-      alert("게시글 삭제에 실패했습니다.");
+      console.error("게시글 삭제 실패 - 전체 에러:", error);
+      console.error("에러 응답:", error.response);
+      console.error("에러 상태 코드:", error.response?.status);
+      console.error("에러 메시지:", error.response?.data);
+
+      // 상세 에러 메시지 표시
+      let errorMessage = "게시글 삭제에 실패했습니다.";
+
+      if (error.response) {
+        switch (error.response.status) {
+          case 401:
+            errorMessage = "로그인이 필요합니다.";
+            break;
+          case 403:
+            errorMessage = "본인이 작성한 게시글만 삭제할 수 있습니다.";
+            break;
+          case 404:
+            errorMessage = "게시글을 찾을 수 없습니다.";
+            break;
+          case 500:
+            errorMessage = "서버 오류가 발생했습니다.";
+            break;
+          default:
+            errorMessage =
+              error.response.data?.message || "게시글 삭제에 실패했습니다.";
+        }
+      }
+
+      alert(errorMessage);
+      setDeleteFlag(false);
     }
   };
 
@@ -281,17 +308,17 @@ export default function PostDetail() {
 
     try {
       setIsCommentSubmitting(true);
-      
+
       // 댓글 작성 API 호출
       await createComment(id, {
         content: newComment,
         parentId: replyTarget ? replyTarget.id : null, // 답글 대상의 ID
       });
-      
+
       // 입력 필드 초기화
       setNewComment("");
       setReplyTarget(null); // 답글 모드 해제
-      
+
       // 최신 댓글 목록 다시 로딩
       await loadComments();
     } catch (err) {
